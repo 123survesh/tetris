@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>tetris</title>
+	<link rel="stylesheet" type="text/css" href="./styles.css">
+</head>
+<body>
+<script type="text/javascript" src="./classAdder.js"></script>
+<script type="text/javascript" src="./assets.js"></script>
+<script type="text/javascript" src="./tiles.js"></script>
+<script type="text/javascript" src="./canvaz.js"></script>
+<script type="text/javascript" src="./game.js"></script>
+<script type="text/javascript">
+	var boardConf = {
+		height: 500,
+		width: 500,
+		classes: ["game-board"],
+		color: {
+			background: "blue"
+			
+		}
+	};
+	var tileConf = {
+		height: 50,
+		width: 50,
+		coords: {
+			x: 200, y:-50
+		},
+		color: {
+			background: "red",
+			border: "red"
+		},
+		borderThickness: 2,
+	};
+	var gameConf = {
+		target: document.body,
+		boardConf: boardConf,
+		tileConf: tileConf
+	};
+	var game = new Game(gameConf);
+	console.log(game);
+</script>
+</body>
+</html>
