@@ -4,6 +4,7 @@
 	tiles.js
 	assets.js
 	canvaz.js
+	tilemap.js
 
 	classAdder.js
 */
@@ -28,6 +29,7 @@ var Game = (function(){
 		this.boardConf = config.boardConf;
 		this.boardConf.target = this.target;
 		this.tileConf = config.tileConf;
+		this.mapConf = config.mapConf;
 		_init.call(this);
 	}
 
@@ -36,7 +38,7 @@ var Game = (function(){
 		var _this = this;
 		this.boardCanvas = new Canvaz(this.boardConf);
 		this.tileCanvas = new Canvaz(this.boardConf);
-
+		this.tileMap = new TileMap(this.mapConf);
 		for(var i=0.5;i<this.boardConf.width;i=i+this.tileConf.height)
 		{
 			for(var j=0.5;j<this.boardConf.height;j=j+this.tileConf.height)
@@ -89,22 +91,23 @@ var Game = (function(){
 			{
 				var rightSum = this.tile.x + this.tile.tileBlockWidth;
 				if(rightSum < this.boardConf.width)
-					this.tile.x += this.tile.height; 
+					this.tile.move({x:(this.tile.x + this.tile.height)});
 				break;
 			}
 			case 3:
 			{
-				this.tile.y += this.tile.height;
+				this.tile.move({y: (this.tile.y + this.tile.height)});
 				break;
 			}
 			case 4:
 			{
 				var leftSum = this.tile.x - this.tile.height;
 				if(leftSum > -1)
-					this.tile.x = leftSum; 
+					this.tile.move({x: leftSum}); 
 				break;
 			}
 		}
+		console.log("CheckTile result = "+this.tileMap.checkTileSet({tileSet:this.tile.mappedTileSet, strictMode: true}));
 		_drawTile.call(this, {ctx: this.tileCanvas.ctx, tile: this.tile, eraseFlag: true});
 	}
 
@@ -137,7 +140,7 @@ var Game = (function(){
 				// console.log("j="+tileSet[i][j]);	
 				if(tileSet[i][j])
 				{
-					_drawSqr.call(this, (x+(parseInt(j)*50)), y+(parseInt(i)*50), config.ctx);
+					_drawSqr.call(this, (x+(parseInt(j)*50)), (y+(parseInt(i)*50)), config.ctx);
 				}
 			}
 		}
