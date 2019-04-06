@@ -4,6 +4,10 @@
 
 */
 var Tile = (function(){
+	var rotationDirectionMap = {
+		"clock": 1,
+		"antiClock": 0
+	}
 	function Tile(config)
 	{
 		this.x = config.coords.x;
@@ -17,13 +21,13 @@ var Tile = (function(){
 		var random_number = Math.random(11);
 		var _10 = Math.floor(random_number*10);
 		var _100 = Math.floor(random_number*100);
-		console.log("_10 = "+_10+", _100 = "+_100);
+		// console.log("_10 = "+_10+", _100 = "+_100);
 		random_number = (_10 > 1)? _10 : (_100 > 11)? _10 : _100;
 		this.tileSet = window.tile_map[random_number];
 		this.mappedTileSet = [];
 		_mapTileSet.call(this);
 		this.tileBlockWidth = this.tileSet[0].length * this.height;
-
+		this.color = window.colorMap[Math.floor(10*Math.random())] || 1;
 	}
 
 	function _mapTileSet()
@@ -60,12 +64,12 @@ var Tile = (function(){
 
 	function _move(coords)
 	{
-		this.x = coords.x || this.x;
-		this.y = coords.y || this.y;
+		this.x = (typeof coords.x == "number")? coords.x : this.x;
+		this.y = (typeof coords.y == "number")? coords.y : this.y;
 		_mapTileSet.call(this);
 	}
 
-	function _rotate()
+	function _rotate(direction)
 	{
 		var tileSet_ = {};
 		var mappedTileSet_ = {};
@@ -77,25 +81,36 @@ var Tile = (function(){
 			var columnCount = column.length;
 			for(var j=0;j<columnCount;j++)
 			{
-				if(!tileSet_[j])
+				var one, two;
+				if(rotationDirectionMap[direction])
 				{
-					tileSet_[j] = [];
-					mappedTileSet_[j] = {};
-				}
-
-				tileSet_[j][i] = this.tileSet[rowCount-i-1][j];
-				
-
-				mappedTileSet_[j][i] = {};
-
-				if(tileSet_[j][i])
-				{
-					mappedTileSet_[j][i].x = (i*this.height) + this.x;
-					mappedTileSet_[j][i].y = (j*this.height) + this.y;
+					one = j;
+					two = i;
 				}
 				else
 				{
-					mappedTileSet_[j][i] = 0;
+					one = i;
+					two = j;
+				}
+				if(!tileSet_[one])
+				{
+					tileSet_[one] = [];
+					mappedTileSet_[one] = {};
+				}
+
+				tileSet_[one][two] = this.tileSet[rowCount-two-1][one];
+				
+
+				mappedTileSet_[one][two] = {};
+
+				if(tileSet_[one][two])
+				{
+					mappedTileSet_[one][two].x = (two*this.height) + this.x;
+					mappedTileSet_[one][two].y = (one*this.height) + this.y;
+				}
+				else
+				{
+					mappedTileSet_[one][two] = 0;
 				}
 			}
 		}
@@ -104,9 +119,10 @@ var Tile = (function(){
 		this.tileBlockWidth = this.tileSet[0].length * this.height;
 	}
 
-	Tile.prototype.rotate = function()
+	Tile.prototype.rotate = function(direction)
 	{
-		_rotate.call(this);
+		direction = direction || "clock";
+		_rotate.call(this, direction);
 	}
 
 	Tile.prototype.move = function(coords)

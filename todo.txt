@@ -1,0 +1,9 @@
+ToDo:
+
+* Make the tiles stop at boundary
+* Create a border condition for the game board
+
+* Rotate by the middle axis
+* write conditions to stop rotation when not possible
+* Remove completed lines
+* Coloured tiles

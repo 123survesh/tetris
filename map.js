@@ -11,9 +11,11 @@ var TileMap = (function () {
 
     function _init() {
         this.tileMap = {};
-        for (var i = 0; i < this.height; i += this.tileSize) {
+        var width = this.width+this.tileSize;
+        var height = this.height+this.tileSize;
+        for (var i = -this.tileSize; i < height; i += this.tileSize) {
         	this.tileMap[i] = {};
-            for (var j = 0; j < this.width; j += this.tileSize) {
+            for (var j = -this.tileSize; j < width; j += this.tileSize) {
                 this.tileMap[i][j] = 0;
             }
         }
@@ -24,11 +26,15 @@ var TileMap = (function () {
 
     function _setBorder() {
         var j, i;
-        for (j = 0; j < this.width; j += this.tileSize) {
-            this.tileMap[0][j] = 1;
+        var width = this.width+this.tileSize;
+        var height = this.height+this.tileSize;
+        for (j = -this.tileSize; j < width; j += this.tileSize) {
+            this.tileMap[-this.tileSize][j] = 1;
+            this.tileMap[this.width][j] = 1;
         }
-        for (i = this.tileSize; i < this.height; i += this.tileSize) {
-            this.tileMap[i][0] = 1;
+        for (i = 0; i < height; i += this.tileSize) {
+            this.tileMap[i][-this.tileSize] = 1;
+            this.tileMap[i][this.height] = 1;
         }
     }
 
@@ -49,8 +55,9 @@ var TileMap = (function () {
 
                 var row = tileSet[rows[i]];
                 for (var j = 0; j < ccount; j++) {
-                    var coords = row[coulmns[j]];
-                    this.tileMap[coords.x][coords.y] = 1;
+                    var coords = row[columns[j]];
+                    if(typeof coords == "object")
+                    	this.tileMap[coords.y][coords.x] = 1;
                 }
             }
             return 1;
@@ -66,11 +73,11 @@ var TileMap = (function () {
     function _checkTileSet(tileSet) {
         var rows = Object.keys(tileSet);
         var rcount = rows.length;
-        for (var i = 0; i < rcount; i++) {
+        for (var i = rcount-1; i > -1; i--) {
             var columns = Object.keys(tileSet[rows[i]]);
             var ccount = columns.length;
 
-            for (var j = 0; j < ccount; j++) {
+            for (var j = ccount-1; j > -1; j--) {
                 if (!_checkTile.call(this, tileSet[rows[i]][columns[j]])) {
                     return false;
                 }
@@ -83,7 +90,7 @@ var TileMap = (function () {
     function _checkTile(coords) {
     	if(coords)
     	{
-	        if (this.tileMap[coords.x][coords.y] == 0) {
+	        if (this.tileMap[coords.y][coords.x] == 0) {
 	            return true;
 	        }
         	return false;
