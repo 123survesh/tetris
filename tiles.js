@@ -18,48 +18,65 @@ var Tile = (function(){
 
 	function _init()
 	{
-		var random_number = Math.random(11);
+		var random_number = Math.random(12);
 		var _10 = Math.floor(random_number*10);
 		var _100 = Math.floor(random_number*100);
 		// console.log("_10 = "+_10+", _100 = "+_100);
 		random_number = (_10 > 1)? _10 : (_100 > 11)? _10 : _100;
 		this.tileSet = window.tile_map[random_number];
+		if(!this.tileSet)
+		{
+			this.tileSet = window.tile_map[random_number];
+		}
+
+		var rows = Object.keys(this.tileSet)
+		this.rowCount = rows.length;
+		this.columnCount = rows[0].length;
+		this.midY = Math.ceil(this.rowCount / 2)-1;
+		this.midX = Math.ceil(this.columnCount / 2)-1;
+		if(this.midY)
+			this.y = (this.midY * this.height) - this.height;
+
 		this.mappedTileSet = [];
 		_mapTileSet.call(this);
 		this.tileBlockWidth = this.tileSet[0].length * this.height;
 		this.color = window.colorMap[Math.floor(10*Math.random())] || 1;
 	}
 
+	/*
+		Must change this to make the center 11 block this.x and this.y
+	*/
 	function _mapTileSet()
 	{
-		var tileSet_ = {};
-		var rows = Object.keys(this.tileSet);
-		var rowCount = rows.length;
-		for(var i=0;i<rowCount;i++)
+		if(this.tileSet)
 		{
-			var column = this.tileSet[rows[i]];
-			var columnCount = column.length;
-			if(!tileSet_[i])
+			var tileSet_ = {};
+			for(var i=0;i<this.rowCount;i++)
 			{
-				tileSet_[i] = {};
-			}	
-			for(var j=0;j<columnCount;j++)
-			{
-				
-				tileSet_[i][j] = {};
-				
-				if(this.tileSet[i][j])
+		
+				if(!tileSet_[i])
 				{
-					tileSet_[i][j].x = (j*this.height) + this.x;
-					tileSet_[i][j].y = (i*this.height) + this.y;
-				}
-				else
+					tileSet_[i] = {};
+				}	
+				for(var j=0;j<this.columnCount;j++)
 				{
-					tileSet_[i][j] = 0;
+					
+					tileSet_[i][j] = {};
+					
+					if(this.tileSet[i][j])
+					{
+						tileSet_[i][j].x = (j <= this.midX)? this.x - (this.midX - j)*this.height : this.x + (j - this.midX)*this.height;
+						tileSet_[i][j].y = (i <= this.midY)? this.y - (this.midY - i)*this.height : this.y + (i - this.midY)*this.height;
+					}
+					else
+					{
+						tileSet_[i][j] = 0;
+					}
 				}
 			}
+			this.mappedTileSet = tileSet_;
+			
 		}
-		this.mappedTileSet = tileSet_;
 	}
 
 	function _move(coords)
@@ -81,24 +98,29 @@ var Tile = (function(){
 			var columnCount = column.length;
 			for(var j=0;j<columnCount;j++)
 			{
-				var one, two;
+				// var subtractValue = rowCount;
+				var one, two, one_, two_;
 				if(rotationDirectionMap[direction])
 				{
 					one = j;
 					two = i;
+					one_ = rowCount-i-1
+					two_ = one;
 				}
 				else
 				{
-					one = i;
-					two = j;
+					one = j;
+					two = i;
+					one_ = i;
+					two_ = columnCount-j-1;
 				}
 				if(!tileSet_[one])
 				{
 					tileSet_[one] = [];
 					mappedTileSet_[one] = {};
 				}
-
-				tileSet_[one][two] = this.tileSet[rowCount-two-1][one];
+				// console.log("one_ = "+one_+" two_ = "+two_);
+				tileSet_[one][two] = this.tileSet[one_][two_];
 				
 
 				mappedTileSet_[one][two] = {};

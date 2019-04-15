@@ -23,25 +23,42 @@ var Game = (function(){
 		"ArrowDown": "down"
 	}
 
+	var gameStateMap = {
+		"play": 1,
+		"pause": 2,
+		"stop": 3,
+		"start": 4,
+		"nextTile": 5
+	}
+
 	function Game(config)
 	{
 		this.target = config.target;
 		this.boardConf = config.boardConf;
-		this.boardConf.target = this.target;
 		this.tileConf = config.tileConf;
 		this.mapConf = config.mapConf;
-
 		_init.call(this);
-		this.flags = {
-			"userControl": 1	
-		}
+		window.addEventListener("keyup",_userController.bind(this));
+		createGameControls.call(this);
 	}
 
 	function _init()
 	{
 		var _this = this;
 		this.tiles = [];
-		this.flags = 
+		if(this.canvasTarget)
+		{
+			this.canvasTarget.innerHTML = "";
+		}
+		else
+		{
+			this.canvasTarget = document.createElement("div");
+			this.canvasTarget.classList.add("game-canvas-wrapper");
+			this.target.appendChild(this.canvasTarget);
+		}
+		
+
+		this.boardConf.target = this.canvasTarget;
 		this.boardCanvas = new Canvaz(this.boardConf);
 		this.tileCanvas = new Canvaz(this.boardConf);
 		this.wallCanvas = new Canvaz(this.boardConf);
@@ -53,28 +70,52 @@ var Game = (function(){
 				this.boardCanvas.ctx.strokeRect(i, j, 46, 46);
 			}
 		}
-
+		this.gameState = 3;
 		_tileKong.call(this);
-		window.addEventListener("keyup",_userController.bind(_this));
 
 	}
 
 	function _tileKong()
 	{
+			switch(this.gameState)
+			{
+				/*case 1:
+				break;
+				case 2:
+				break;*/
+				case 3:
+				case 4:
+				case 5:
+					this.tile = null;
+					this.tile = new Tile(this.tileConf);
+				break;
+			}
+			this.gameState = 1;
 			var _this = this;
-			this.tile = null;
-			this.tile = new Tile(this.tileConf);
 			var comparator = _this.boardCanvas.height;
+			var firstFlag = true;
 			_this.tileDropper = setInterval(function(){
 				if(_this.tile.y < comparator)
 				{
 					if(!_move.call(_this, "down"))
 					{
-						_wrongMoveAction.call(_this,{dir:3});
+						if(firstFlag) // hit top
+						{
+							_this.gameState = 3;
+							clearInterval(_this.tileDropper);
+							console.log("game over #_#");
+						}
+						else
+						{
+							firstFlag = false;
+							_wrongMoveAction.call(_this,{dir:3});
+						}
 					}
+					firstFlag = false;
 				}
 				else
 				{
+					this.gameState = 5;
 					clearInterval(_this.tileDropper);
 					_tileKong.call(_this);
 				}
@@ -87,12 +128,41 @@ var Game = (function(){
 	{
 		if(config.dir)
 		{
-			
-			// /*erase the tileCanvas*/this.tileCanvas.ctx.clearRect(0, 0, this.tileCanvas.width, this.tileCanvas.height);
-			this.tileMap.setTileSet({tileSet:this.tile.mappedTileSet, strictMode:true});
-			/*draw on the wallCanvas*/_drawTile.call(this,{ctx: this.wallCanvas.ctx, tile:this.tile, eraseFlag: false});
-			clearInterval(this.tileDropper);
-			_tileKong.call(this);
+			switch(config.dir)
+			{
+				// case 9:
+				// case 2:
+				// case 4:
+
+				// break;	
+				case 3:
+					this.gameState = 5;
+					// /*erase the tileCanvas*/this.tileCanvas.ctx.clearRect(0, 0, this.tileCanvas.width, this.tileCanvas.height);
+					this.tileMap.setTileSet({tileSet:this.tile.mappedTileSet, strictMode:true});
+					/*draw on the wallCanvas*/_drawTile.call(this,{ctx: this.wallCanvas.ctx, tile:this.tile, eraseFlag: false});
+					clearInterval(this.tileDropper);
+					var fullLineRows = this.tileMap.checkForFullLine();
+					var rowLength = fullLineRows.length;
+					if(rowLength)
+					{
+						this.tileCanvas.ctx.clearRect(0, 0, this.boardConf.width, this.boardConf.height);
+						for(var i=rowLength-1;i>=0;i--)
+						{
+							/*
+								move one row down in tileMap
+								clear the current row in canvas 
+								move the above rows in canvas down
+							*/
+							this.tileMap.moveDownOneRow(fullLineRows[i]);
+							this.wallCanvas.ctx.clearRect(0, fullLineRows[i], this.boardConf.width, this.tileConf.height);
+							var imgData = this.wallCanvas.ctx.getImageData(0, 0, this.boardConf.width, fullLineRows[i]);
+							// this.wallCanvas.ctx.clearRect(0, 0, this.boardConf.width, fullLineRows[i]-this.tileConf.height);
+							this.wallCanvas.ctx.putImageData(imgData, 0, this.tileConf.height);
+						}
+					}
+					_tileKong.call(this);
+				break;
+			}
 			
 		}
 
@@ -106,10 +176,13 @@ var Game = (function(){
 */
 	function _userController(e)
 	{
-		var dir = directionKeyMap[e.key];
-		if(!_move.call(this, dir))
+		if(this.gameState == 1)
 		{
-			_wrongMoveAction.call(this,{dir:directionMap[dir]});
+			var dir = directionKeyMap[e.key];
+			if(!_move.call(this, dir))
+			{
+				_wrongMoveAction.call(this,{dir:directionMap[dir]});
+			}
 		}
 	}
 
@@ -128,9 +201,9 @@ var Game = (function(){
 		{
 			case 2:
 			{
-				var rightSum = this.tile.x + this.tile.tileBlockWidth;
-				if(rightSum < this.boardConf.width)
-					this.tile.move({x:(this.tile.x + this.tile.height)});
+				// var rightSum = this.tile.x + this.tile.tileBlockWidth;
+				// if(rightSum < this.boardConf.width)
+				this.tile.move({x:(this.tile.x + this.tile.height)});
 				break;
 			}
 			case 3:
@@ -141,7 +214,7 @@ var Game = (function(){
 			case 4:
 			{
 				var leftSum = this.tile.x - this.tile.height;
-				if(leftSum > -1)
+				// if(leftSum > -1)
 					this.tile.move({x: leftSum}); 
 				break;
 			}
@@ -205,9 +278,36 @@ var Game = (function(){
 		
 	}
 
+	function createGameControls()
+	{
+		var _this = this;
+		var buttonWrapper = document.createElement("div");
+		buttonWrapper.classList.add("game-control-wrapper");
+
+		var pauseButton = document.createElement("div");
+		pauseButton.classList.add("pause-button");
+		pauseButton.innerText = "||";
+		pauseButton.addEventListener("click",_gamePlayControl.bind(this, {command: "pause"}));
+
+		var playButton = document.createElement("div");
+		playButton.classList.add("play-button");
+		playButton.innerText = "\u25b6";
+		playButton.addEventListener("click",_gamePlayControl.bind(this, {command: "play"}));
+
+		var restartButton = document.createElement("div");
+		restartButton.classList.add("restart-button");
+		restartButton.innerText = "\u21bb";
+		restartButton.addEventListener("click",_gamePlayControl.bind(this, {command: "restart"}));
+
+		buttonWrapper.appendChild(pauseButton);
+		buttonWrapper.appendChild(playButton);
+		buttonWrapper.appendChild(restartButton);
+
+		this.target.appendChild(buttonWrapper);
+	}
+
 	function _drawSqr(x, y, ctx)
 	{
-
 		// console.log("x = "+x+", y = "+y);
 		ctx.fillRect(x, y, 46, 46);
 	}
@@ -217,16 +317,36 @@ var Game = (function(){
 		ctx.clearRect(x, y, 46, 46);
 	}
 
-	function gamePlayControl(config)
+	function _gamePlayControl(config)
 	{
-		//
 		switch(config.command)
 		{
-			case "stop-start":
-
+			case "stop":
+				this.gameState = 3;
+				clearInterval(this.tileDropper);
 			break;
-			case "pause-play":
+
+			case "start":
+				this.gameState = 4;
+				_init.call(this);
+			break;
+			
+			case "pause":
+				this.gameState = 2;
+				clearInterval(this.tileDropper);
+			break;
+
+			case "play":
+				this.gameState = 1;
+				clearInterval(this.tileDropper);
+				_tileKong.call(this);
+			break;
+			
 			case "restart":
+				this.gameState = 4;
+				clearInterval(this.tileDropper);
+				_init.call(this);
+			break;
 		}
 	}
 
@@ -235,11 +355,10 @@ var Game = (function(){
 		_rotateCurrentTile.call(this);
 	}
 
-	Game.prototype.stop = function()
+	Game.prototype.control = function(control)
 	{
-		_stop.call(this);
+		_gamePlayControl.call(this, control);
 	}
 
 	return Game;
 })();
-

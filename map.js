@@ -29,12 +29,12 @@ var TileMap = (function () {
         var width = this.width+this.tileSize;
         var height = this.height+this.tileSize;
         for (j = -this.tileSize; j < width; j += this.tileSize) {
-            this.tileMap[-this.tileSize][j] = 1;
-            this.tileMap[this.width][j] = 1;
+            this.tileMap[-this.tileSize][j] = 9;
+            this.tileMap[this.width][j] = 9;
         }
         for (i = 0; i < height; i += this.tileSize) {
-            this.tileMap[i][-this.tileSize] = 1;
-            this.tileMap[i][this.height] = 1;
+            this.tileMap[i][-this.tileSize] = 9;
+            this.tileMap[i][this.height] = 9;
         }
     }
 
@@ -78,9 +78,12 @@ var TileMap = (function () {
             var ccount = columns.length;
 
             for (var j = ccount-1; j > -1; j--) {
-                if (!_checkTile.call(this, tileSet[rows[i]][columns[j]])) {
-                    return false;
-                }
+            	if(tileSet[rows[i]][columns[j]])
+            	{
+	                if (!_checkTile.call(this, tileSet[rows[i]][columns[j]])) {
+	                    return false;
+	                }
+            	}
             }
 
         }
@@ -98,6 +101,54 @@ var TileMap = (function () {
     	return true;
     }
 
+    function _checkForFullLine()
+    {
+    	var i, j, start = [], end = [];
+    	var buffer = [];
+    	start[0] = (this.setBorder)? (this.height - this.tileSize) : this.height;
+    	end[0] = 0;
+    	start[1] = 0;
+    	end[1] = (this.setBorder)? (this.width - this.tileSize) : this.width;
+    	for(i=start[0];i>=end[0];i-=this.tileSize)
+    	{
+    		var fullLine = true;
+    		for(j=start[1]; j<=end[1];j+=this.tileSize)
+    		{
+    			if(_checkTile.call(this, {x: j, y: i}))
+    			{
+    				fullLine = false;
+    			}
+    		}
+    		if(fullLine)
+    		{
+    			buffer.push(i);
+    		}
+    	}
+    	return buffer;
+
+    }
+
+    function _unsetRow(row)
+    {
+
+		var start, end;
+		start = 0;
+		end = (this.setBorder)? (this.width - this.tileSize) : this.width;
+		for(var i = start; i< end; i+=this.tileSize)
+		{
+    		this.tileMap[row][i] = 0;
+			
+		}
+    }
+
+    function _moveRowsDown(row)
+    {
+    	for(var i =row; i>0; i-=this.tileSize)	
+    	{
+    		this.tileMap[i] = JSON.parse(JSON.stringify(this.tileMap[i-this.tileSize]));
+    	}
+    	_unsetRow.call(this, i);
+    }
 
     TileMap.prototype.checkTileSet = function (config) {
         return _checkTileSet.call(this, config.tileSet);
@@ -111,6 +162,13 @@ var TileMap = (function () {
         return _setTileSet.call(this, config);
     }
 
+    TileMap.prototype.checkForFullLine = function () {
+        return _checkForFullLine.call(this);
+    }
+
+    TileMap.prototype.moveDownOneRow = function (row) {
+        _moveRowsDown.call(this, row);
+    }
 
     return TileMap;
 })();
