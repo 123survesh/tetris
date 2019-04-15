@@ -11,10 +11,10 @@ var TileMap = (function () {
 
     function _init() {
         this.tileMap = {};
-        var width = this.width+this.tileSize;
-        var height = this.height+this.tileSize;
+        var width = this.width + this.tileSize;
+        var height = this.height + this.tileSize;
         for (var i = -this.tileSize; i < height; i += this.tileSize) {
-        	this.tileMap[i] = {};
+            this.tileMap[i] = {};
             for (var j = -this.tileSize; j < width; j += this.tileSize) {
                 this.tileMap[i][j] = 0;
             }
@@ -26,8 +26,8 @@ var TileMap = (function () {
 
     function _setBorder() {
         var j, i;
-        var width = this.width+this.tileSize;
-        var height = this.height+this.tileSize;
+        var width = this.width + this.tileSize;
+        var height = this.height + this.tileSize;
         for (j = -this.tileSize; j < width; j += this.tileSize) {
             this.tileMap[-this.tileSize][j] = 9;
             this.tileMap[this.width][j] = 9;
@@ -56,8 +56,8 @@ var TileMap = (function () {
                 var row = tileSet[rows[i]];
                 for (var j = 0; j < ccount; j++) {
                     var coords = row[columns[j]];
-                    if(typeof coords == "object")
-                    	this.tileMap[coords.y][coords.x] = 1;
+                    if (typeof coords == "object")
+                        this.tileMap[coords.y][coords.x] = 1;
                 }
             }
             return 1;
@@ -73,17 +73,16 @@ var TileMap = (function () {
     function _checkTileSet(tileSet) {
         var rows = Object.keys(tileSet);
         var rcount = rows.length;
-        for (var i = rcount-1; i > -1; i--) {
+        for (var i = rcount - 1; i > -1; i--) {
             var columns = Object.keys(tileSet[rows[i]]);
             var ccount = columns.length;
 
-            for (var j = ccount-1; j > -1; j--) {
-            	if(tileSet[rows[i]][columns[j]])
-            	{
-	                if (!_checkTile.call(this, tileSet[rows[i]][columns[j]])) {
-	                    return false;
-	                }
-            	}
+            for (var j = ccount - 1; j > -1; j--) {
+                if (tileSet[rows[i]][columns[j]]) {
+                    if (!_checkTile.call(this, tileSet[rows[i]][columns[j]])) {
+                        return false;
+                    }
+                }
             }
 
         }
@@ -91,63 +90,54 @@ var TileMap = (function () {
     }
 
     function _checkTile(coords) {
-    	if(coords)
-    	{
-	        if (this.tileMap[coords.y][coords.x] == 0) {
-	            return true;
-	        }
-        	return false;
-    	}
-    	return true;
+        if (coords) {
+            if (this.tileMap[coords.y][coords.x] == 0) {
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
-    function _checkForFullLine()
-    {
-    	var i, j, start = [], end = [];
-    	var buffer = [];
-    	start[0] = (this.setBorder)? (this.height - this.tileSize) : this.height;
-    	end[0] = 0;
-    	start[1] = 0;
-    	end[1] = (this.setBorder)? (this.width - this.tileSize) : this.width;
-    	for(i=start[0];i>=end[0];i-=this.tileSize)
-    	{
-    		var fullLine = true;
-    		for(j=start[1]; j<=end[1];j+=this.tileSize)
-    		{
-    			if(_checkTile.call(this, {x: j, y: i}))
-    			{
-    				fullLine = false;
-    			}
-    		}
-    		if(fullLine)
-    		{
-    			buffer.push(i);
-    		}
-    	}
-    	return buffer;
+    function _checkForFullLine() {
+        var i, j, start = [],
+            end = [];
+        var buffer = [];
+        start[0] = (this.setBorder) ? (this.height - this.tileSize) : this.height;
+        end[0] = 0;
+        start[1] = 0;
+        end[1] = (this.setBorder) ? (this.width - this.tileSize) : this.width;
+        for (i = start[0]; i >= end[0]; i -= this.tileSize) {
+            var fullLine = true;
+            for (j = start[1]; j <= end[1]; j += this.tileSize) {
+                if (_checkTile.call(this, { x: j, y: i })) {
+                    fullLine = false;
+                }
+            }
+            if (fullLine) {
+                buffer.push(i);
+            }
+        }
+        return buffer;
 
     }
 
-    function _unsetRow(row)
-    {
+    function _unsetRow(row) {
 
-		var start, end;
-		start = 0;
-		end = (this.setBorder)? (this.width - this.tileSize) : this.width;
-		for(var i = start; i< end; i+=this.tileSize)
-		{
-    		this.tileMap[row][i] = 0;
-			
-		}
+        var start, end;
+        start = 0;
+        end = (this.setBorder) ? (this.width - this.tileSize) : this.width;
+        for (var i = start; i < end; i += this.tileSize) {
+            this.tileMap[row][i] = 0;
+
+        }
     }
 
-    function _moveRowsDown(row)
-    {
-    	for(var i =row; i>0; i-=this.tileSize)	
-    	{
-    		this.tileMap[i] = JSON.parse(JSON.stringify(this.tileMap[i-this.tileSize]));
-    	}
-    	_unsetRow.call(this, i);
+    function _moveRowsDown(row) {
+        for (var i = row; i > 0; i -= this.tileSize) {
+            this.tileMap[i] = JSON.parse(JSON.stringify(this.tileMap[i - this.tileSize]));
+        }
+        _unsetRow.call(this, i);
     }
 
     TileMap.prototype.checkTileSet = function (config) {

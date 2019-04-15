@@ -3,28 +3,27 @@
     position: relative;
 }
 
-.game-canvas-wrapper .game-board:first-child{
-	position: relative;
+.game-canvas-wrapper .game-board:first-child {
+    position: relative;
 }
 
-.game-board{
-	display: inline-block;
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	height: 500px;
-	width: 500px;
+.game-board {
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 500px;
+    width: 500px;
 }
 
-.game-control-wrapper div
-{
-	display: inline-block;
-	font-size: 18px;
-	height: 50px;
-	width: 50px;
-	cursor: pointer;
-	line-height: 50px;
-	text-align: center;
-	border: 2px solid;
-	margin: 5px;
+.game-control-wrapper div {
+    display: inline-block;
+    font-size: 18px;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    line-height: 50px;
+    text-align: center;
+    border: 2px solid;
+    margin: 5px;
 }
