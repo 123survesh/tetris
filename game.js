@@ -232,15 +232,25 @@ var Game = (function () {
             config.ctx.clearRect(0, 0, this.tileCanvas.width, this.tileCanvas.height);
         }
 
-        for (var i in tileSet) {
-            // console.log("i="+i);
-            for (var j in tileSet[i]) {
-                // console.log("j="+tileSet[i][j]);	
-                if (tileSet[i][j]) {
-                    _drawSqr.call(this, (x + (parseInt(j) * config.tile.height)), (y + (parseInt(i) * config.tile.height)), config.ctx);
+
+        for (var i = 0; i < config.tile.rowCount; i++) {
+
+            for (var j = 0; j < config.tile.columnCount; j++) {
+
+                if (config.tile.mappedTileSet[i][j]) {
+                    _drawSqr.call(this, config.tile.mappedTileSet[i][j].x, config.tile.mappedTileSet[i][j].y, config.ctx);
                 }
             }
         }
+        // for (var i in tileSet) {
+        //     // console.log("i="+i);
+        //     for (var j in tileSet[i]) {
+        //         // console.log("j="+tileSet[i][j]);	
+        //         if (tileSet[i][j]) {
+        //             _drawSqr.call(this, (x + (parseInt(j) * config.tile.height)), (y + (parseInt(i) * config.tile.height)), config.ctx);
+        //         }
+        //     }
+        // }
 
     }
 

@@ -30,11 +30,11 @@ var TileMap = (function () {
         var height = this.height + this.tileSize;
         for (j = -this.tileSize; j < width; j += this.tileSize) {
             this.tileMap[-this.tileSize][j] = 9;
-            this.tileMap[this.width][j] = 9;
+            this.tileMap[this.height][j] = 9;
         }
         for (i = 0; i < height; i += this.tileSize) {
             this.tileMap[i][-this.tileSize] = 9;
-            this.tileMap[i][this.height] = 9;
+            this.tileMap[i][this.width] = 9;
         }
     }
 

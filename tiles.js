@@ -27,13 +27,13 @@ var Tile = (function () {
             this.tileSet = window.tile_map[random_number];
         }
 
-        var rows = Object.keys(this.tileSet)
-        this.rowCount = rows.length;
-        this.columnCount = rows[0].length;
-        this.midY = Math.ceil(this.rowCount / 2) - 1;
-        this.midX = Math.ceil(this.columnCount / 2) - 1;
-        if (this.midY)
-            this.y = (this.midY * this.height) - this.height;
+        _initRCCount.call(this);
+
+        if (this.midY) {
+            if (_checkRow(this.tileSet[0])) {
+                this.y = (this.midY * this.height) - this.height;
+            }
+        }
 
         this.mappedTileSet = [];
         _mapTileSet.call(this);
@@ -41,6 +41,23 @@ var Tile = (function () {
         this.color = window.colorMap[Math.floor(10 * Math.random())] || 1;
     }
 
+    function _checkRow(arr) {
+        var arrLength = arr.length;
+        for (var i = 0; i < arrLength; i++) {
+            if (arr[i])
+                return true;
+        }
+        return false;
+    }
+
+    function _initRCCount() {
+        var rows = Object.keys(this.tileSet)
+        this.rowCount = rows.length;
+        this.columnCount = this.tileSet[rows[0]].length;
+        this.midY = Math.ceil(this.rowCount / 2) - 1;
+        this.midX = Math.ceil(this.columnCount / 2) - 1;
+
+    }
     /*
     	Must change this to make the center 11 block this.x and this.y
     */
@@ -77,7 +94,7 @@ var Tile = (function () {
 
     function _rotate(direction) {
         var tileSet_ = {};
-        var mappedTileSet_ = {};
+        // var mappedTileSet_ = {};
         var rows = Object.keys(this.tileSet);
         var rowCount = rows.length;
         for (var i = 0; i < rowCount; i++) {
@@ -99,25 +116,29 @@ var Tile = (function () {
                 }
                 if (!tileSet_[one]) {
                     tileSet_[one] = [];
-                    mappedTileSet_[one] = {};
+                    // mappedTileSet_[one] = {};
                 }
                 // console.log("one_ = "+one_+" two_ = "+two_);
                 tileSet_[one][two] = this.tileSet[one_][two_];
 
 
-                mappedTileSet_[one][two] = {};
+                // mappedTileSet_[one][two] = {};
 
-                if (tileSet_[one][two]) {
-                    mappedTileSet_[one][two].x = (two * this.height) + this.x;
-                    mappedTileSet_[one][two].y = (one * this.height) + this.y;
-                } else {
-                    mappedTileSet_[one][two] = 0;
-                }
+                // if (tileSet_[one][two]) {
+                //     // mappedTileSet_[one][two].x = (two * this.height) + this.x;
+                //     // mappedTileSet_[one][two].y = (one * this.height) + this.y;
+                //     mappedTileSet_[one][two].x = (one_ <= this.midX) ? this.x - (this.midX - one_) * this.height : this.x + (one_ - this.midX) * this.height;
+                //     mappedTileSet_[one][two].y = (two_ <= this.midY) ? this.y - (this.midY - two_) * this.height : this.y + (two_ - this.midY) * this.height;
+                // } else {
+                //     mappedTileSet_[one][two] = 0;
+                // }
             }
         }
         this.tileSet = tileSet_;
-        this.mappedTileSet = mappedTileSet_;
-        this.tileBlockWidth = this.tileSet[0].length * this.height;
+        _initRCCount.call(this);
+        _mapTileSet.call(this);
+        // this.mappedTileSet = mappedTileSet_;
+        // this.tileBlockWidth = this.tileSet[0].length * this.height;
     }
 
     Tile.prototype.rotate = function (direction) {
