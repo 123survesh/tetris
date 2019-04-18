@@ -26,6 +26,7 @@ var Tile = (function () {
         if (!this.tileSet) {
             this.tileSet = window.tile_map[random_number];
         }
+        console.log("TileSet Number: "+random_number);
 
         _initRCCount.call(this);
 
@@ -34,7 +35,6 @@ var Tile = (function () {
                 this.y = (this.midY * this.height) - this.height;
             }
         }
-
         this.mappedTileSet = [];
         _mapTileSet.call(this);
         this.tileBlockWidth = this.tileSet[0].length * this.height;

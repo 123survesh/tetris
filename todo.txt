@@ -7,3 +7,13 @@ ToDo:
 * write conditions to stop rotation when not possible
 * Remove completed lines
 * Coloured tiles
+
+
+* Add Scores
+* Add Speed
+
+* Improve randomness
+* Improve color schemes
+* Add sounds
+* Add Animations
+* Add start and end cards

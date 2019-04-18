@@ -36,9 +36,9 @@ var Game = (function () {
         this.boardConf = config.boardConf;
         this.tileConf = config.tileConf;
         this.mapConf = config.mapConf;
+        _createGameTitleBoard.call(this);
         _init.call(this);
         window.addEventListener("keyup", _userController.bind(this));
-        createGameControls.call(this);
     }
 
     function _init() {
@@ -52,6 +52,13 @@ var Game = (function () {
             this.target.appendChild(this.canvasTarget);
         }
 
+        this.gameSpeed = 500;
+        this.gameSpeedCounter = 0;
+        this.gameLevelCounter = 1;
+        this.gameSpeedConstant = 10;
+        this.score = 0;
+        this.scoreConstant = 5;
+
 
         this.boardConf.target = this.canvasTarget;
         this.boardCanvas = new Canvaz(this.boardConf);
@@ -64,6 +71,11 @@ var Game = (function () {
             }
         }
         this.gameState = 3;
+        
+        _updateSpeed.call(this, true);
+        _updateScore.call(this, false, true);
+        _updateStatus.call(this);
+        
         _tileKong.call(this);
 
     }
@@ -99,12 +111,13 @@ var Game = (function () {
                     }
                 }
                 firstFlag = false;
+                _updateStatus.call(_this);
             } else {
                 this.gameState = 5;
                 clearInterval(_this.tileDropper);
                 _tileKong.call(_this);
             }
-        }, 500);
+        }, _this.gameSpeed);
 
 
     }
@@ -126,6 +139,7 @@ var Game = (function () {
                 clearInterval(this.tileDropper);
                 var fullLineRows = this.tileMap.checkForFullLine();
                 var rowLength = fullLineRows.length;
+                _updateScore.call(this);
                 if (rowLength) {
                     this.tileCanvas.ctx.clearRect(0, 0, this.boardConf.width, this.boardConf.height);
                     for (var i = rowLength - 1; i >= 0; i--) {
@@ -139,6 +153,13 @@ var Game = (function () {
                         var imgData = this.wallCanvas.ctx.getImageData(0, 0, this.boardConf.width, fullLineRows[i]);
                         // this.wallCanvas.ctx.clearRect(0, 0, this.boardConf.width, fullLineRows[i]-this.tileConf.height);
                         this.wallCanvas.ctx.putImageData(imgData, 0, this.tileConf.height);
+
+                        _updateSpeed.call(this);
+                        _updateScore.call(this, true);
+                        
+                        this.gameSpeed -= this.gameSpeedConstant / this.gameLevelCounter;
+                        console.log("Game Speed: ", this.gameSpeed);
+                        console.log("Score: ", this.score);
                     }
                 }
                 _tileKong.call(this);
@@ -162,6 +183,57 @@ var Game = (function () {
                 _wrongMoveAction.call(this, { dir: directionMap[dir] });
             }
         }
+    }
+
+    function _updateStatus() {
+    	switch(this.gameState)
+    	{
+    		case 3:
+    			this.tags.gameStatusText.innerText = "Game Over";
+    		break;
+    		case 2:
+    			this.tags.gameStatusText.innerText = "Game Paused";
+    		break;
+    		case 1:
+    			this.tags.gameStatusText.innerText = "Game Playing";
+    		break;
+    	}
+    }
+
+    function _updateSpeed(reinit) {
+    	var levelUp = false;
+        if (!reinit) {
+            this.gameSpeedCounter++;
+            if (this.gameSpeedCounter < this.gameLevelCounter * this.gameSpeedConstant) {
+                this.gameSpeedCounter++;
+            } else {
+                this.gameSpeedCounter = 1;
+                this.gameLevelCounter++;
+                console.log("Level = "+this.gameLevelCounter);
+                levelUp = true;
+            }
+
+        }
+        if(levelUp)
+        {
+        	this.tags.levelText.innerText = this.gameLevelCounter;
+        }
+        this.tags.speedText.innerText = this.gameLevelCounter + "." + this.gameSpeedCounter;
+    }
+
+    function _updateScore(fullLine, reinit) {
+        if (reinit) {
+            this.score = 0;
+        } else {
+            if (fullLine) {
+                this.score += (this.scoreConstant * this.gameLevelCounter) * (this.boardConf.width / this.tileConf.width);
+            } else {
+                this.score += this.scoreConstant * this.gameLevelCounter;
+            }
+        }
+
+
+        this.tags.scoreText.innerText = this.score;
     }
 
     function _move(dir) {
@@ -254,7 +326,58 @@ var Game = (function () {
 
     }
 
-    function createGameControls() {
+    function _createGameTitleBoard() {
+        this.tags = {};
+
+        var gameTitleBoardWrapper = document.createElement("div");
+        gameTitleBoardWrapper.classList.add("game-title-board");
+
+        var gameTitleWrapper = document.createElement("div");
+        var gameTitle = document.createElement("span");
+        gameTitle.innerText = "Tetris, a test-game";
+        gameTitleWrapper.appendChild(gameTitle);
+
+        var gameStatusWrapper = document.createElement("div");
+
+        var score = document.createElement("div");
+        score.innerText = "Score: ";
+        this.tags.scoreText = document.createElement("span");
+        this.tags.scoreText.innerText = "0";
+        score.appendChild(this.tags.scoreText);
+
+        var level = document.createElement("div");
+        level.innerText = "Level: ";
+        this.tags.levelText = document.createElement("span");
+        this.tags.levelText.innerText = "1";
+        level.appendChild(this.tags.levelText);
+
+        var speed = document.createElement("div");
+        speed.innerText = "Speed: ";
+        this.tags.speedText = document.createElement("span");
+        this.tags.speedText.innerText = "1.0";
+        speed.appendChild(this.tags.speedText);
+
+        var gameStatus = document.createElement("div");
+        this.tags.gameStatusText = document.createElement("div");
+        this.tags.gameStatusText.innerText = "Game Over";
+        gameStatus.appendChild(this.tags.gameStatusText);
+
+        gameStatusWrapper.appendChild(level);
+        gameStatusWrapper.appendChild(score);
+        gameStatusWrapper.appendChild(speed);
+        gameStatusWrapper.appendChild(gameStatus);
+
+
+        var gameControlsWrapper = _createGameControls.call(this);
+
+        gameTitleBoardWrapper.appendChild(gameTitleWrapper);
+        gameTitleBoardWrapper.appendChild(gameStatusWrapper);
+        gameTitleBoardWrapper.appendChild(gameControlsWrapper);
+
+        this.target.appendChild(gameTitleBoardWrapper);
+    }
+
+    function _createGameControls() {
         var _this = this;
         var buttonWrapper = document.createElement("div");
         buttonWrapper.classList.add("game-control-wrapper");
@@ -278,7 +401,7 @@ var Game = (function () {
         buttonWrapper.appendChild(playButton);
         buttonWrapper.appendChild(restartButton);
 
-        this.target.appendChild(buttonWrapper);
+        return buttonWrapper;
     }
 
     function _drawSqr(x, y, ctx) {
@@ -320,6 +443,16 @@ var Game = (function () {
             break;
         }
     }
+
+    function playmusic()
+	{
+	    var randomIndex = Math.floor(10*Math.random(sounds.length));
+	    var src = "./sounds/"+sounds[randomIndex]+".mp3";
+	    console.log("index = "+randomIndex+" src = "+src);
+	    var audio = new Audio(src);
+	    audio.pause();
+	    audio.play();
+	}
 
     Game.prototype.rotateCurrentTile = function () {
         _rotateCurrentTile.call(this);
