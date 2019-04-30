@@ -1,4 +1,10 @@
-.game-canvas-wrapper {
+html, body{
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+.game-canvas-wrapper{
     display: inline-block;
     position: relative;
 }
@@ -24,4 +30,16 @@
     text-align: center;
     border: 2px solid;
     margin: 5px;
+}
+
+.game-title-board{
+    font-size: 20px;
+}
+
+#target{
+    display: inline-block;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }

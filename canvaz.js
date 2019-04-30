@@ -3,8 +3,8 @@ var Canvaz = (function () {
         this.target = config.target;
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
-        this.height = config.height;
-        this.width = config.width;
+        this.height = config.dimension.h;
+        this.width = config.dimension.w;
         this.classes = config.classes;
         _init.call(this);
     }

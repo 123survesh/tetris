@@ -1,9 +1,9 @@
 var TileMap = (function () {
 
     function TileMap(config) {
-        this.height = config.height;
-        this.width = config.width;
-        this.tileSize = config.tileSize;
+        this.height = config.dimension.board.h;
+        this.width = config.dimension.board.w;
+        this.tileSize = config.dimension.tile.h;
         this.setBorder = config.setBorder || true;
 
         _init.call(this);
@@ -28,6 +28,8 @@ var TileMap = (function () {
         var j, i;
         var width = this.width + this.tileSize;
         var height = this.height + this.tileSize;
+        // var finalHeightIndex = (Math.floor((this.height+this.tileSize)/this.tileSize))*this.tileSize;
+        // var finalWidthIndex = (Math.floor((this.width+this.tileSize)/this.tileSize))*this.tileSize;
         for (j = -this.tileSize; j < width; j += this.tileSize) {
             this.tileMap[-this.tileSize][j] = 9;
             this.tileMap[this.height][j] = 9;

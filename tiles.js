@@ -12,16 +12,13 @@ var Tile = (function () {
     function Tile(config) {
         this.x = config.coords.x;
         this.y = config.coords.y;
-        this.height = config.height;
+        this.height = config.dimension.h;
         _init.call(this);
     }
 
     function _init() {
-        var random_number = Math.random(12);
-        var _10 = Math.floor(random_number * 10);
-        var _100 = Math.floor(random_number * 100);
-        // console.log("_10 = "+_10+", _100 = "+_100);
-        random_number = (_10 > 1) ? _10 : (_100 > 11) ? _10 : _100;
+        var random_number = Math.floor(Math.random()*12);
+
         this.tileSet = window.tile_map[random_number];
         if (!this.tileSet) {
             this.tileSet = window.tile_map[random_number];

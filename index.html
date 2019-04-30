@@ -7,7 +7,7 @@
 </head>
 
 <body>
-	
+	<div id="target"></div>
     <script type="text/javascript" src="./classAdder.js"></script>
     <script type="text/javascript" src="./assets.js"></script>
     <script type="text/javascript" src="./tiles.js"></script>
@@ -15,7 +15,30 @@
     <script type="text/javascript" src="./map.js"></script>
     <script type="text/javascript" src="./game.js"></script>
     <script type="text/javascript">
+    
+
+
+    var h = Math.floor(window.innerHeight/1.5);
+    var w = Math.floor(h/2);
+    var t = Math.floor(w/10);
+    h = Math.floor(h/t)*t;
+    w = Math.floor(w/t)*t;
+    var dimension = {
+        board : {
+            h: h,
+            w: w
+        },
+        tile : {
+            h: t,
+            w: t
+        }
+    }
+    var coords = {
+        x: Math.floor((Math.floor(dimension.board.w/2))/dimension.tile.h)*dimension.tile.h,
+        y: -(dimension.tile.h)
+    }
     var boardConf = {
+        dimension: dimension.board,
         height: 700,
         width: 500,
         classes: ["game-board"],
@@ -26,12 +49,10 @@
     }
 
     var tileConf = {
+        dimension: dimension.tile,
         height: 50,
         width: 50,
-        coords: {
-            x: 200,
-            y: -50
-        },
+        coords: coords,
         color: {
             background: "red",
             border: "red"
@@ -40,19 +61,22 @@
     }
 
     var mapConf = {
+        dimension: dimension,
         height: 700,
         width: 500,
         tileSize: 50
     }
 
     var gameConf = {
-        target: document.body,
+        target: document.getElementById("target"),
         boardConf: boardConf,
         tileConf: tileConf,
-        mapConf: mapConf
+        mapConf: mapConf,
+        audioPath: "./audio/"
     }
 
     var game = new Game(gameConf);
+    
     // console.log(game);
     </script>
 </body>

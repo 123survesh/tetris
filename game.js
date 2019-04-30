@@ -36,9 +36,20 @@ var Game = (function () {
         this.boardConf = config.boardConf;
         this.tileConf = config.tileConf;
         this.mapConf = config.mapConf;
+        this.audioPath = config.audioPath;
         _createGameTitleBoard.call(this);
         _init.call(this);
+
+        var instructions = document.createElement("div");
+        instructions.id = "instructions";
+
+        instructions.innerHTML = '<div><b>Instructions for moving and rotating the tiles:</b></div>'+
+        '<div>1. Use the &#8592; (left), &#8594 (right) and &#8595 (down) arrow keys for navigation</div>'+
+        '<div>2. Use the &#8593 (up) arrow key for rotation</div>';
+        this.target.appendChild(instructions);
+
         window.addEventListener("keyup", _userController.bind(this));
+        window.addEventListener("focus", function(){this.target.focus();});
     }
 
     function _init() {
@@ -65,9 +76,10 @@ var Game = (function () {
         this.tileCanvas = new Canvaz(this.boardConf);
         this.wallCanvas = new Canvaz(this.boardConf);
         this.tileMap = new TileMap(this.mapConf);
-        for (var i = 0.5; i < this.boardConf.width; i = i + this.tileConf.height) {
-            for (var j = 0.5; j < this.boardConf.height; j = j + this.tileConf.height) {
-                this.boardCanvas.ctx.strokeRect(i, j, 46, 46);
+        this.boardCanvas.ctx.strokeRect(1, 1, this.boardConf.dimension.w-2, this.boardConf.dimension.h-2);
+        for (var i = 0; i < this.boardConf.dimension.w; i = i + this.tileConf.dimension.h) {
+            for (var j = 0; j < this.boardConf.dimension.h; j = j + this.tileConf.dimension.h) {
+                this.boardCanvas.ctx.strokeRect(i, j, this.tileConf.dimension.h, this.tileConf.dimension.h);
             }
         }
         this.gameState = 3;
@@ -141,18 +153,19 @@ var Game = (function () {
                 var rowLength = fullLineRows.length;
                 _updateScore.call(this);
                 if (rowLength) {
-                    this.tileCanvas.ctx.clearRect(0, 0, this.boardConf.width, this.boardConf.height);
+                    this.tileCanvas.ctx.clearRect(0, 0, this.boardConf.dimension.w, this.boardConf.dimension.h);
                     for (var i = rowLength - 1; i >= 0; i--) {
                         /*
                         	move one row down in tileMap
                         	clear the current row in canvas 
                         	move the above rows in canvas down
                         */
+                        _playmusic.call(this, "fullLine");
                         this.tileMap.moveDownOneRow(fullLineRows[i]);
-                        this.wallCanvas.ctx.clearRect(0, fullLineRows[i], this.boardConf.width, this.tileConf.height);
-                        var imgData = this.wallCanvas.ctx.getImageData(0, 0, this.boardConf.width, fullLineRows[i]);
-                        // this.wallCanvas.ctx.clearRect(0, 0, this.boardConf.width, fullLineRows[i]-this.tileConf.height);
-                        this.wallCanvas.ctx.putImageData(imgData, 0, this.tileConf.height);
+                        this.wallCanvas.ctx.clearRect(0, fullLineRows[i], this.boardConf.dimension.w, this.tileConf.dimension.h);
+                        var imgData = this.wallCanvas.ctx.getImageData(0, 0, this.boardConf.dimension.w, fullLineRows[i]);
+                        // this.wallCanvas.ctx.clearRect(0, 0, this.boardConf.dimension.w, fullLineRows[i]-this.tileConf.dimension.h);
+                        this.wallCanvas.ctx.putImageData(imgData, 0, this.tileConf.dimension.h);
 
                         _updateSpeed.call(this);
                         _updateScore.call(this, true);
@@ -177,6 +190,8 @@ var Game = (function () {
     	- when item dropped cannot go beyond the first cell
     */
     function _userController(e) {
+        e.preventDefault();
+        _playmusic.call(this, "move");
         if (this.gameState == 1) {
             var dir = directionKeyMap[e.key];
             if (!_move.call(this, dir)) {
@@ -226,7 +241,7 @@ var Game = (function () {
             this.score = 0;
         } else {
             if (fullLine) {
-                this.score += (this.scoreConstant * this.gameLevelCounter) * (this.boardConf.width / this.tileConf.width);
+                this.score += (this.scoreConstant * this.gameLevelCounter) * (this.boardConf.dimension.w / this.tileConf.dimension.w);
             } else {
                 this.score += this.scoreConstant * this.gameLevelCounter;
             }
@@ -250,7 +265,7 @@ var Game = (function () {
         case 2:
             {
                 // var rightSum = this.tile.x + this.tile.tileBlockWidth;
-                // if(rightSum < this.boardConf.width)
+                // if(rightSum < this.boardConf.dimension.w)
                 this.tile.move({ x: (this.tile.x + this.tile.height) });
                 break;
             }
@@ -297,7 +312,7 @@ var Game = (function () {
         var y = config.tile.y;
         var tileSet = config.tile.tileSet || null;
 
-        config.ctx.lineWidth = 2;
+        config.ctx.lineWidth = 0;
         config.ctx.strokeStyle = config.tile.color[1];
         config.ctx.fillStyle = config.tile.color[0];
         if (config.eraseFlag) {
@@ -406,11 +421,11 @@ var Game = (function () {
 
     function _drawSqr(x, y, ctx) {
         // console.log("x = "+x+", y = "+y);
-        ctx.fillRect(x, y, 46, 46);
+        ctx.fillRect(x, y, this.tileConf.dimension.h, this.tileConf.dimension.h);
     }
 
     function _eraseSqr(x, y, ctx) {
-        ctx.clearRect(x, y, 46, 46);
+        ctx.clearRect(x, y, this.tileConf.dimension.h, this.tileConf.dimension.h);
     }
 
     function _gamePlayControl(config) {
@@ -444,11 +459,15 @@ var Game = (function () {
         }
     }
 
-    function playmusic()
+    function _playmusic(state)
 	{
-	    var randomIndex = Math.floor(10*Math.random(sounds.length));
-	    var src = "./sounds/"+sounds[randomIndex]+".mp3";
-	    console.log("index = "+randomIndex+" src = "+src);
+	    var filePath = audioFiles[state];
+        if(typeof filePath == "object")
+        {
+            filePath = filePath[Math.floor(Math.random()*4)];
+        }
+	    var src = this.audioPath+filePath;
+	    // console.log("index = "+randomIndex+" src = "+src);
 	    var audio = new Audio(src);
 	    audio.pause();
 	    audio.play();

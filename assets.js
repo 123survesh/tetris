@@ -34,3 +34,9 @@ window.colorMap = {
     8: ["#AF6E4D", "#b28c79"],
     9: ["#5946B2", "#7b70af"],
 }
+
+window.audioFiles = {
+    "move": "tick.mp3",
+    "fullLine": ["lazer_1.mp3","lazer_2.mp3","lazer_3.mp3","lazer_4.mp3"],
+    "gameOver": "laugh.mp3" 
+}
