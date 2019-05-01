@@ -49,6 +49,7 @@ var Game = (function () {
         this.target.appendChild(instructions);
 
         window.addEventListener("keyup", _userController.bind(this));
+        var touchEvents = new userController({callbacks:_userController.bind(this)});
         window.addEventListener("focus", function(){this.target.focus();});
     }
 
@@ -189,11 +190,11 @@ var Game = (function () {
     	- moving in a direction where there are tiles
     	- when item dropped cannot go beyond the first cell
     */
-    function _userController(e) {
+    function _userController(e, config) {
         e.preventDefault();
         _playmusic.call(this, "move");
         if (this.gameState == 1) {
-            var dir = directionKeyMap[e.key];
+            var dir = config.direction || directionKeyMap[e.key];
             if (!_move.call(this, dir)) {
                 _wrongMoveAction.call(this, { dir: directionMap[dir] });
             }
@@ -260,45 +261,50 @@ var Game = (function () {
         */
         var x = this.tile.x;
         var y = this.tile.y;
-        var directionType = directionMap[dir];
-        switch (directionType) {
-        case 2:
-            {
-                // var rightSum = this.tile.x + this.tile.tileBlockWidth;
-                // if(rightSum < this.boardConf.dimension.w)
-                this.tile.move({ x: (this.tile.x + this.tile.height) });
-                break;
+        var directionType = (typeof dir == "string")? directionMap[dir] : dir;
+        if(directionType)
+        {
+            switch (directionType) {
+            case 2:
+                {
+                    // var rightSum = this.tile.x + this.tile.tileBlockWidth;
+                    // if(rightSum < this.boardConf.dimension.w)
+                    this.tile.move({ x: (this.tile.x + this.tile.height) });
+                    break;
+                }
+            case 3:
+                {
+                    this.tile.move({ y: (this.tile.y + this.tile.height) });
+                    break;
+                }
+            case 4:
+                {
+                    var leftSum = this.tile.x - this.tile.height;
+                    // if(leftSum > -1)
+                    this.tile.move({ x: leftSum });
+                    break;
+                }
+            case 9:
+                {
+                    this.tile.rotate();
+                    break;
+                }
             }
-        case 3:
-            {
-                this.tile.move({ y: (this.tile.y + this.tile.height) });
-                break;
+            var possible = this.tileMap.checkTileSet({ tileSet: this.tile.mappedTileSet, strictMode: true });
+            if (!possible) {
+                if (directionType < 9) {
+                    this.tile.move({ x: x, y: y });
+                } else {
+                    this.tile.rotate("antiClock");
+                }
+                return false;
             }
-        case 4:
-            {
-                var leftSum = this.tile.x - this.tile.height;
-                // if(leftSum > -1)
-                this.tile.move({ x: leftSum });
-                break;
-            }
-        case 9:
-            {
-                this.tile.rotate();
-                break;
-            }
+            // console.log("CheckTile result = "+possible);
+            _drawTile.call(this, { ctx: this.tileCanvas.ctx, tile: this.tile, eraseFlag: true });
+            return true;
+            
         }
-        var possible = this.tileMap.checkTileSet({ tileSet: this.tile.mappedTileSet, strictMode: true });
-        if (!possible) {
-            if (directionType < 9) {
-                this.tile.move({ x: x, y: y });
-            } else {
-                this.tile.rotate("antiClock");
-            }
-            return false;
-        }
-        // console.log("CheckTile result = "+possible);
-        _drawTile.call(this, { ctx: this.tileCanvas.ctx, tile: this.tile, eraseFlag: true });
-        return true;
+        return false;
     }
 
     function _rotateCurrentTile() {
@@ -479,6 +485,10 @@ var Game = (function () {
 
     Game.prototype.control = function (control) {
         _gamePlayControl.call(this, control);
+    }
+
+    Game.prototype.moveTile = function (config) {
+        _move.call(this, config.direction);
     }
 
     return Game;
