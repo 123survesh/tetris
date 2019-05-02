@@ -237,7 +237,7 @@ var Game = (function () {
                 if(dir)
                     {
                         console.log(dir);
-                        _playmusic.call(this, "move");
+                        // _playmusic.call(this, "move");
                         if (!_move.call(this, dir)) {
                             _wrongMoveAction.call(this, { dir: directionMap[dir] });
                         }
