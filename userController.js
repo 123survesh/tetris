@@ -39,11 +39,11 @@ var userController = (function(){
 		e.preventDefault();
 		this.coords.start.x = e.touches[0].pageX;
 		this.coords.start.y = e.touches[0].pageY;
+		this.touchMoveFlag = false;
 	}
 
 	function _handleMove(e)
 	{
-		this.touchMoveFlag = true;
 		var d = "";
 		e.stopPropagation();
 		// e.preventDefault();
@@ -52,6 +52,7 @@ var userController = (function(){
 		var xFlag = (Math.abs(this.coords.move.x) > Math.abs(this.coords.move.y));
 		if(Math.abs(this.coords.move.x) > 30 || Math.abs(this.coords.move.y) > 30)
 		{
+			this.touchMoveFlag = true;
 			if(xFlag)
 			{
 				if(this.coords.move.x > 0)
@@ -86,10 +87,10 @@ var userController = (function(){
 
 	function _handleEnd(e)
 	{
-		// e.stopPropagation();
-		// e.preventDefault();
+		e.stopPropagation();
+		e.preventDefault();
 		
-		if(!((Math.abs(this.coords.move.x) > 1) || (Math.abs(this.coords.move.y) > 1)) && this.touchMoveFlag)
+		if(!this.touchMoveFlag)
 		{
 			_callTheCallBacks.call(this,e , {direction_name:"tap", direction: _direction["tap"]});		
 		}

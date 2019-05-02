@@ -144,9 +144,18 @@ var Game = (function () {
                 if (!_move.call(_this, "down")) {
                     if (firstFlag) // hit top
                     {
-                        _this.gameState = 3;
-                        clearInterval(_this.tileDropper);
-                        console.log("game over #_#");
+                        if(this.tileMap && this.tileMap.checkForFullLine(0))
+                        {
+                            _this.gameState = 5;
+                            clearInterval(_this.tileDropper);
+                            _tileKong.call(_this);
+                        }
+                        else
+                        {
+                            _this.gameState = 3;
+                            clearInterval(_this.tileDropper);
+                            console.log("game over #_#");
+                        }
                     } else {
                         firstFlag = false;
                         _wrongMoveAction.call(_this, { dir: 3 });
@@ -155,7 +164,7 @@ var Game = (function () {
                 firstFlag = false;
                 _updateStatus.call(_this);
             } else {
-                this.gameState = 5;
+                _this.gameState = 5;
                 clearInterval(_this.tileDropper);
                 _tileKong.call(_this);
             }
@@ -179,7 +188,7 @@ var Game = (function () {
                 /*draw on the wallCanvas*/
                 _drawTile.call(this, { ctx: this.wallCanvas.ctx, tile: this.tile, eraseFlag: false });
                 clearInterval(this.tileDropper);
-                var fullLineRows = this.tileMap.checkForFullLine();
+                var fullLineRows = this.tileMap.checkForFullLines();
                 var rowLength = fullLineRows.length;
                 _updateScore.call(this);
                 if (rowLength) {

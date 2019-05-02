@@ -31,7 +31,10 @@ var TileMap = (function () {
         // var finalHeightIndex = (Math.floor((this.height+this.tileSize)/this.tileSize))*this.tileSize;
         // var finalWidthIndex = (Math.floor((this.width+this.tileSize)/this.tileSize))*this.tileSize;
         for (j = -this.tileSize; j < width; j += this.tileSize) {
-            this.tileMap[-this.tileSize][j] = 9;
+            if((j == -this.tileSize) || (j+this.tileSize > width))
+            {
+                this.tileMap[-this.tileSize][j] = 9;
+            }
             this.tileMap[this.height][j] = 9;
         }
         for (i = 0; i < height; i += this.tileSize) {
@@ -101,27 +104,42 @@ var TileMap = (function () {
         return true;
     }
 
-    function _checkForFullLine() {
+    function _checkForFullLines() {
         var i, j, start = [],
             end = [];
         var buffer = [];
         start[0] = (this.setBorder) ? (this.height - this.tileSize) : this.height;
         end[0] = 0;
-        start[1] = 0;
-        end[1] = (this.setBorder) ? (this.width - this.tileSize) : this.width;
+        // start[1] = 0;
+        // end[1] = (this.setBorder) ? (this.width - this.tileSize) : this.width;
         for (i = start[0]; i >= end[0]; i -= this.tileSize) {
-            var fullLine = true;
-            for (j = start[1]; j <= end[1]; j += this.tileSize) {
-                if (_checkTile.call(this, { x: j, y: i })) {
-                    fullLine = false;
-                }
-            }
-            if (fullLine) {
+            // var fullLine = true;
+            // for (j = start[1]; j <= end[1]; j += this.tileSize) {
+            //     if (_checkTile.call(this, { x: j, y: i })) {
+            //         fullLine = false;
+            //     }
+            // }
+            var fullLineFlag = _checkForFullLine.call(this, i);
+            if (fullLineFlag) {
                 buffer.push(i);
             }
         }
         return buffer;
 
+    }
+
+    function _checkForFullLine(line)
+    {
+        var start = 0;
+        var end = (this.setBorder) ? (this.width - this.tileSize) : this.width;
+        var fullLine = true;
+        for (var j = start; j <= end; j += this.tileSize) {
+            if (_checkTile.call(this, { x: j, y: line })) {
+                fullLine = false;
+                return fullLine;
+            }
+        }
+        return fullLine;
     }
 
     function _unsetRow(row) {
@@ -154,8 +172,8 @@ var TileMap = (function () {
         return _setTileSet.call(this, config);
     }
 
-    TileMap.prototype.checkForFullLine = function () {
-        return _checkForFullLine.call(this);
+    TileMap.prototype.checkForFullLines = function () {
+        return _checkForFullLines.call(this);
     }
 
     TileMap.prototype.moveDownOneRow = function (row) {

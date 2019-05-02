@@ -34,7 +34,6 @@ var Tile = (function () {
         }
         this.mappedTileSet = [];
         _mapTileSet.call(this);
-        this.tileBlockWidth = this.tileSet[0].length * this.height;
         this.color = window.colorMap[Math.floor(10 * Math.random())] || 1;
     }
 
