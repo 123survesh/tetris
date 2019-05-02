@@ -49,7 +49,7 @@ var userController = (function(){
 		this.coords.move.x = e.touches[0].pageX - this.coords.start.x;
 		this.coords.move.y = e.touches[0].pageY - this.coords.start.y;
 		var xFlag = (Math.abs(this.coords.move.x) > Math.abs(this.coords.move.y));
-		if(Math.abs(this.coords.move.x) > 50 || Math.abs(this.coords.move.y) > 50)
+		if(Math.abs(this.coords.move.x) > 30 || Math.abs(this.coords.move.y) > 30)
 		{
 			if(xFlag)
 			{

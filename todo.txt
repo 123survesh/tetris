@@ -17,3 +17,7 @@ ToDo:
 * Add sounds
 * Add Animations
 * Add start and end cards
+
+
+* Add device specific instructions, for touch and keyboard
+* Make changes so that the game conrol buttons work when touch is enabled

@@ -9,6 +9,15 @@
 	classAdder.js
 */
 var Game = (function () {
+
+    var keyboardInstructions = '<div><b>Instructions for moving and rotating the tiles:</b></div>'+
+        '<div>1. Use the &#8592; (left), &#8594 (right) and &#8595 (down) arrow keys for navigation</div>'+
+        '<div>2. Use the &#8593 (up) arrow key for rotation</div>';
+
+    var touchInstructions = '<div><b>Instructions for moving and rotating the tiles:</b></div>'+
+        '<div>1. Swipe left, right and down to navigate</div>'+
+        '<div>2. Tap once for rotation</div>';
+
     var directionMap = {
         "up": 9,
         "right": 2,
@@ -43,13 +52,20 @@ var Game = (function () {
         var instructions = document.createElement("div");
         instructions.id = "instructions";
 
-        instructions.innerHTML = '<div><b>Instructions for moving and rotating the tiles:</b></div>'+
-        '<div>1. Use the &#8592; (left), &#8594 (right) and &#8595 (down) arrow keys for navigation</div>'+
-        '<div>2. Use the &#8593 (up) arrow key for rotation</div>';
+        var mobileFlag = false;
+        if(window.innerHeight > window.innerWidth)
+        {
+            instructions.innerHTML = touchInstructions;
+        }
+        else
+        {
+            instructions.innerHTML = keyboardInstructions;
+        }
+
         this.target.appendChild(instructions);
 
         window.addEventListener("keyup", _userController.bind(this));
-        var touchEvents = new userController({callbacks:_userController.bind(this)});
+        var touchEvents = new userController({callbacks:_userController.bind(this), target:this.canvasTarget});
         window.addEventListener("focus", function(){this.target.focus();});
     }
 
