@@ -1,3 +1,6 @@
+*{
+    box-sizing: border-box;
+}
 html, body{
     height: 100%;
     width: 100%;
@@ -33,13 +36,22 @@ html, body{
 }
 
 .game-title-board{
-    font-size: 20px;
+}
+
+.meta-wrapper{
+    font-size: 18px;
+    display: inline-block;
+    float: left;
+    padding: 20px;
+    max-width: 40%;
+}
+
+.canvas-wrapper{
+    display: inline-block;
 }
 
 #target{
     display: inline-block;
     position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    padding: 10px 0;
 }

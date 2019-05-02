@@ -43,6 +43,7 @@ var userController = (function(){
 
 	function _handleMove(e)
 	{
+		this.touchMoveFlag = true;
 		var d = "";
 		e.stopPropagation();
 		// e.preventDefault();
@@ -88,7 +89,7 @@ var userController = (function(){
 		// e.stopPropagation();
 		// e.preventDefault();
 		
-		if(!(Math.abs(this.coords.move.x) > 1) || !(Math.abs(this.coords.move.y) > 1))
+		if(!((Math.abs(this.coords.move.x) > 1) || (Math.abs(this.coords.move.y) > 1)) && this.touchMoveFlag)
 		{
 			_callTheCallBacks.call(this,e , {direction_name:"tap", direction: _direction["tap"]});		
 		}

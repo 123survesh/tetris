@@ -46,25 +46,10 @@ var Game = (function () {
         this.tileConf = config.tileConf;
         this.mapConf = config.mapConf;
         this.audioPath = config.audioPath;
-        _createGameTitleBoard.call(this);
         _init.call(this);
 
-        var instructions = document.createElement("div");
-        instructions.id = "instructions";
 
-        var mobileFlag = false;
-        if(window.innerHeight > window.innerWidth)
-        {
-            instructions.innerHTML = touchInstructions;
-        }
-        else
-        {
-            instructions.innerHTML = keyboardInstructions;
-        }
-
-        this.target.appendChild(instructions);
-
-        window.addEventListener("keyup", _userController.bind(this));
+        window.addEventListener("keydown", _userController.bind(this));
         var touchEvents = new userController({callbacks:_userController.bind(this), target:this.canvasTarget});
         window.addEventListener("focus", function(){this.target.focus();});
     }
@@ -74,10 +59,38 @@ var Game = (function () {
         this.tiles = [];
         if (this.canvasTarget) {
             this.canvasTarget.innerHTML = "";
-        } else {
+        } 
+        else 
+        {
+            this.metaWrapper = document.createElement("div");
+            this.metaWrapper.classList.add("meta-wrapper");
+
+            this.canvasWrapper = document.createElement("div");
+            this.canvasWrapper.classList.add("canvas-wrapper");
+            
+            _createGameTitleBoard.call(this);
+            
             this.canvasTarget = document.createElement("div");
             this.canvasTarget.classList.add("game-canvas-wrapper");
-            this.target.appendChild(this.canvasTarget);
+            this.canvasWrapper.appendChild(this.canvasTarget);
+            
+            var instructions = document.createElement("div");
+            instructions.id = "instructions";
+
+            var mobileFlag = false;
+            if(window.innerHeight > window.innerWidth)
+            {
+                instructions.innerHTML = touchInstructions;
+            }
+            else
+            {
+                instructions.innerHTML = keyboardInstructions;
+            }
+
+            this.metaWrapper.appendChild(instructions);
+
+            this.target.appendChild(this.metaWrapper);
+            this.target.appendChild(this.canvasWrapper);
         }
 
         this.gameSpeed = 500;
@@ -207,12 +220,19 @@ var Game = (function () {
     	- when item dropped cannot go beyond the first cell
     */
     function _userController(e, config) {
-        e.preventDefault();
-        _playmusic.call(this, "move");
-        if (this.gameState == 1) {
-            var dir = config.direction || directionKeyMap[e.key];
-            if (!_move.call(this, dir)) {
-                _wrongMoveAction.call(this, { dir: directionMap[dir] });
+        if(config || directionKeyMap[e.key])
+        {
+            e.preventDefault();
+            if (this.gameState == 1) {
+                var dir = directionKeyMap[e.key] || config.direction;
+                if(dir)
+                    {
+                        console.log(dir);
+                        _playmusic.call(this, "move");
+                        if (!_move.call(this, dir)) {
+                            _wrongMoveAction.call(this, { dir: directionMap[dir] });
+                        }
+                    }
             }
         }
     }
@@ -411,7 +431,7 @@ var Game = (function () {
         gameTitleBoardWrapper.appendChild(gameStatusWrapper);
         gameTitleBoardWrapper.appendChild(gameControlsWrapper);
 
-        this.target.appendChild(gameTitleBoardWrapper);
+        this.metaWrapper.appendChild(gameTitleBoardWrapper);
     }
 
     function _createGameControls() {
