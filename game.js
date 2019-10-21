@@ -275,7 +275,7 @@ var Game = (function () {
             }
 
         }
-        if(levelUp)
+        if(levelUp || reinit)
         {
         	this.tags.levelText.innerText = this.gameLevelCounter;
         }
